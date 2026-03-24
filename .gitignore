@@ -1,0 +1,33 @@
+# Core
+.env
+.env.local
+.env.*.local
+*.log
+*.err
+.vscode/
+.idea/
+
+# Backend
+backend/venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+test_api_log.txt
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+*.local
+.npm
+.eslintcache
+
+# Project
+uploads/*
+!uploads/.gitkeep
+infra/pgdata/
+
+# Vercel
+.vercel

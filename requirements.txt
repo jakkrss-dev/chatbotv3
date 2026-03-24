@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+pgvector
+pypdf
+python-multipart
+sse-starlette
+google-genai
+langchain
+langchain-google-genai
+python-dotenv
+duckduckgo-search
