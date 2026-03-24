@@ -1,6 +1,6 @@
 from google import genai
 from pydantic import BaseModel, Field
-from backend.config import client, generate_with_fallback, CHAT_MODEL
+from backend.config import generate_with_fallback, CHAT_MODEL
 from backend.rag.sql.sql_tool import execute_sql_query
 
 SCHEMA_INFO = """

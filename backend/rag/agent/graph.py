@@ -1,4 +1,4 @@
-from backend.config import client, generate_with_fallback, CHAT_MODEL
+from backend.config import generate_with_fallback, CHAT_MODEL
 from backend.rag.retriever_pgvector import search_documents
 from backend.rag.sql.function_calling_sql import ask_sql
 from google import genai
