@@ -31,3 +31,4 @@ infra/pgdata/
 
 # Vercel
 .vercel
+public/
