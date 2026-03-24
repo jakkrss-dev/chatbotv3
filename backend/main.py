@@ -11,7 +11,7 @@ from backend.rag.ingest import process_file
 from backend.rag.agent.graph import process_chat
 from backend.config import UPLOAD_DIR
 
-app = FastAPI(title="RAG Chatbot Workshop")
+app = FastAPI(title="RAG Chatbot Workshop", root_path="/api")
 
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
