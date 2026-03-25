@@ -22,4 +22,10 @@ A Client-Server architecture web application designed to allow users to converse
 - `POST /ingest/file` - File upload processor
 
 ## 5. Deployment
-Can be deployed via Docker Compose leveraging the `./infra/docker-compose.yml` for DB initialization, and standard standalone Python/Node processes for Web.
+Recommended production deployment:
+
+- Supabase for PostgreSQL + pgvector
+- Render for the FastAPI backend
+- Vercel for the React frontend
+
+See `DEPLOYMENT.md` for the exact environment variables and deployment steps.

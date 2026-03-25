@@ -4,22 +4,26 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 from pydantic import BaseModel
+from sqlalchemy import text
 import os
 import uuid
 
 from backend.rag.ingest import process_file
 from backend.rag.agent.graph import process_chat
-from backend.config import UPLOAD_DIR
+from backend.config import CORS_ORIGINS, ROOT_PATH, UPLOAD_DIR
+from backend.database import engine
 
-app = FastAPI(title="RAG Chatbot Workshop", root_path="/api")
+app = FastAPI(title="RAG Chatbot Workshop", root_path=ROOT_PATH)
 
 # Serve uploaded files
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 
+allow_all_origins = CORS_ORIGINS == ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Allows Vercel frontend to call Render backend
-    allow_credentials=True,
+    allow_origins=["*"] if allow_all_origins else CORS_ORIGINS,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -32,7 +36,15 @@ class ChatRequest(BaseModel):
 
 @app.get("/health")
 def health_check():
-    return {"status": "healthy", "db": "connected"}
+    try:
+        with engine.connect() as connection:
+            connection.execute(text("SELECT 1"))
+        return {"status": "healthy", "db": "connected"}
+    except Exception as exc:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "unhealthy", "db": "disconnected", "detail": str(exc)[:300]},
+        )
 
 @app.get("/debug")
 def debug_check():

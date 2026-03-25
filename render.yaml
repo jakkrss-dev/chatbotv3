@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: rag-chatbot-backend
+    env: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    disk:
+      name: uploads
+      mountPath: /var/data/uploads
+      sizeGB: 1
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CHAT_MODEL
+        value: gemini-2.0-flash
+      - key: EMBED_DIM
+        value: "768"
+      - key: ROOT_PATH
+        value: ""
+      - key: UPLOAD_DIR
+        value: /var/data/uploads
+      - key: CORS_ORIGINS
+        sync: false

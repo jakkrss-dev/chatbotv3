@@ -10,13 +10,13 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://app:app@localhos
 EMBED_MODEL = "models/gemini-embedding-001"
 CHAT_MODEL = os.getenv("CHAT_MODEL", "gemini-2.0-flash") 
 EMBED_DIM = int(os.getenv("EMBED_DIM", 768))
+ROOT_PATH = os.getenv("ROOT_PATH", "").rstrip("/")
+CORS_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ORIGINS", "*").split(",") if origin.strip()]
 
 print(f"DEBUG: Initializing with CHAT_MODEL = {CHAT_MODEL}")
 
-if os.getenv("VERCEL"):
-    UPLOAD_DIR = "/tmp"
-else:
-    UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+default_upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", default_upload_dir)
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
@@ -106,4 +106,3 @@ def generate_with_fallback(prompt: Optional[str] = None, contents=None, config=N
             
     error_msg = "Generation failed with all models:\n" + "\n".join(error_summary)
     raise Exception(error_msg)
-

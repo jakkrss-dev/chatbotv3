@@ -5,7 +5,7 @@ from pgvector.sqlalchemy import Vector
 from backend.config import DATABASE_URL, EMBED_DIM
 import uuid
 
-engine = create_engine(DATABASE_URL)
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
