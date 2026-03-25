@@ -19,7 +19,10 @@ Reply with ONLY ONE WORD (DOCUMENTS, SQL_DB, GENERAL, or MIXED).
 """
     response = generate_with_fallback(
         prompt=prompt,
-        config=genai.types.GenerateContentConfig(temperature=0.0)
+        config=genai.types.GenerateContentConfig(
+            temperature=0.0,
+            max_output_tokens=5
+        )
     )
     return response.text.strip().upper()
 
@@ -75,7 +78,10 @@ Question: {question}
 """
     response = generate_with_fallback(
         prompt=prompt,
-        config=genai.types.GenerateContentConfig(temperature=0.3)
+        config=genai.types.GenerateContentConfig(
+            temperature=0.3,
+            max_output_tokens=1024
+        )
     )
     return response.text
 
@@ -93,7 +99,8 @@ User Question: {question}
         prompt=prompt,
         config=genai.types.GenerateContentConfig(
             temperature=0.7,
-            tools=[search_web]
+            tools=[search_web],
+            max_output_tokens=1024
         )
     )
     
@@ -158,6 +165,14 @@ def process_chat(question: str, mode: str = "auto", session_id: str = "default_u
     # Auto Agentic RAG Pipeline
     tool_trace.append({"step": "Mode: Auto Agentic RAG"})
     
+    # 0. Heuristic Fast-Path (Skip AI for greetings to save time on Vercel)
+    greetings = ["hello", "hi", "hey", "สวัสดี", "หวัดดี", "สะหวัดดี", "ช่วยด้วย"]
+    if any(g in question.lower() for g in greetings) and len(question) < 15:
+         tool_trace.append({"step": "Heuristic Routing", "result": "GREETING"})
+         answer, _ = generate_general_answer(question, chat_history)
+         add_to_history(session_id, question, answer)
+         return answer, citations, tool_trace, None
+
     # 1. Route Intent
     intent = route_intent(question, chat_history)
     tool_trace.append({"step": f"Intent Routing", "result": intent})
