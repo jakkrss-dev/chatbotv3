@@ -34,13 +34,17 @@ def get_genai_client():
 # Broad fallback list tailored to available models in this specific environment
 FALLBACK_MODELS = [
     CHAT_MODEL, 
+    'gemini-2.5-flash',
+    'gemini-2.5-pro',
     'gemini-2.0-flash',
     'gemini-2.0-flash-lite',
-    'gemini-1.5-flash',
-    'gemini-1.5-pro',
+    'gemini-flash-latest',
+    'gemini-pro-latest',
 ]
 
-def generate_with_fallback(prompt: str = None, contents=None, config=None):
+from typing import Optional
+
+def generate_with_fallback(prompt: Optional[str] = None, contents=None, config=None):
     """Generates content with automatic model fallback and retry logic for 429 errors."""
     last_err = None
     all_errors = {}
@@ -70,21 +74,36 @@ def generate_with_fallback(prompt: str = None, contents=None, config=None):
                 print(f"Generation attempt with {model_name} failed: {err_str}")
                 all_errors[model_name] = str(e)
                 
-                if "429" in err_str or "resource_exhausted" in err_str or "quota" in err_str:
-                    print(f"Quota hit for {model_name}, retrying... ({retries} retries left)")
-                    retries -= 1
-                    time.sleep(retry_sleep)
-                    last_err = e
-                    continue
+                # Check for quota errors
+                is_quota_error = any(kw in err_str for kw in ["429", "resource_exhausted", "quota"])
+                
+                if is_quota_error:
+                    # If it's a hard limit (limit: 0 or similar in message), don't retry this model
+                    if "limit: 0" in err_str or "quota exceeded" in err_str:
+                        print(f"Hard quota limit hit for {model_name}, moving to next model.")
+                        break
+                        
+                    if retries > 0:
+                        print(f"Quota hit for {model_name}, retrying in {retry_sleep}s... ({retries} retries left)")
+                        retries -= 1
+                        time.sleep(retry_sleep)
+                        last_err = e
+                        continue
+                    else:
+                        print(f"Retries exhausted for {model_name}, trying fallback...")
+                        break
                 else:
-                    # For non-quota errors (like 404), switch to next model immediately
-                    print(f"Non-quota error with {model_name}, trying fallback...")
+                    # For non-quota errors (like 404 or config errors), switch to next model immediately
+                    print(f"Non-quota error with {model_name}: {err_str[:100]}... trying fallback...")
                     last_err = e
                     break 
                     
     error_summary = []
-    for m, err in all_errors.items():
-        error_summary.append(f"{m}: {err}")
+    # Sort errors to show most relevant first
+    for m in models_to_try:
+        if m in all_errors:
+            error_summary.append(f"{m}: {all_errors[m]}")
+            
     error_msg = "Generation failed with all models:\n" + "\n".join(error_summary)
     raise Exception(error_msg)
 
