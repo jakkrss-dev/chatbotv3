@@ -11,9 +11,21 @@ from backend.rag.ingest import process_file
 from backend.rag.agent.graph import process_chat
 from backend.config import UPLOAD_DIR
 
-app = FastAPI(title="RAG Chatbot Workshop", root_path="/api")
+app = FastAPI(title="RAG Chatbot Workshop")
 
+# Serve uploaded files
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+
+# Serve frontend static files
+if os.path.exists("./public"):
+    app.mount("/", StaticFiles(directory="./public", html=True), name="static")
+
+    @app.exception_handler(404)
+    async def custom_404_handler(request, __):
+        if not request.url.path.startswith("/api"):
+            from fastapi.responses import FileResponse
+            return FileResponse("./public/index.html")
+        return JSONResponse(status_code=404, content={"detail": "Not Found"})
 
 app.add_middleware(
     CORSMiddleware,
