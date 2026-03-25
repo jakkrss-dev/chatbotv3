@@ -1,15 +1,10 @@
 {
   "version": 2,
   "outputDirectory": "public",
-  "functions": {
-    "api/index.py": {
-      "maxDuration": 60
-    }
-  },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/index.py"
+      "destination": "https://YOUR-RENDER-URL.onrender.com/$1"
     },
     {
       "source": "/(.*)",

@@ -29,7 +29,7 @@ if os.path.exists("./public"):
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # For dev purposes
+    allow_origins=["*"], # Allows Vercel frontend to call Render backend
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
