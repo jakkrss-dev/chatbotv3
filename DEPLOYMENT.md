@@ -32,7 +32,7 @@ Required environment variables:
 Recommended values:
 
 - `ROOT_PATH=` (leave empty for Render)
-- `UPLOAD_DIR=/var/data/uploads`
+- `UPLOAD_DIR=/tmp/uploads`
 - `CHAT_MODEL=gemini-2.0-flash`
 
 Set `CORS_ORIGINS` to your Vercel domain, for example:
@@ -61,5 +61,6 @@ If your Render service URL changes, update `VITE_API_URL` and redeploy Vercel.
 
 ## 4. Notes
 
-- Uploaded files are stored on disk by the backend. On Render, use the attached disk defined in `render.yaml` to keep files after redeploys and restarts.
+- On Render free tier, uploaded files are stored in `/tmp/uploads` and can disappear after restart or redeploy.
+- If you want uploaded files to persist on Render, switch to a paid plan and attach a persistent disk.
 - The backend can still run locally with a local Postgres instance by changing only `DATABASE_URL`.

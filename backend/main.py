@@ -41,6 +41,7 @@ def health_check():
             connection.execute(text("SELECT 1"))
         return {"status": "healthy", "db": "connected"}
     except Exception as exc:
+        print(f"Health check DB connection failed: {exc}")
         return JSONResponse(
             status_code=503,
             content={"status": "unhealthy", "db": "disconnected", "detail": str(exc)[:300]},

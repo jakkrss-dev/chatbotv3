@@ -1,11 +1,19 @@
 from sqlalchemy import create_engine, Column, String, Integer, Text, Numeric, Date, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import sessionmaker, declarative_base, relationship
+from sqlalchemy.pool import NullPool
 from pgvector.sqlalchemy import Vector
 from backend.config import DATABASE_URL, EMBED_DIM
 import uuid
 
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+engine_kwargs = {"pool_pre_ping": True}
+
+# Supabase shared pooler on port 6543 works best when SQLAlchemy does not
+# keep its own connection pool on top of the server-side pooler.
+if "pgbouncer=true" in DATABASE_URL or ":6543/" in DATABASE_URL:
+    engine_kwargs["poolclass"] = NullPool
+
+engine = create_engine(DATABASE_URL, **engine_kwargs)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
